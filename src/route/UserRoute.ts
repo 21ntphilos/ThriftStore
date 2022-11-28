@@ -1,5 +1,5 @@
-import { verify } from "crypto"
-import express,{Request,Response,NextFunction}from "express"
+import express from "express"
+import { getAllProperties } from "../controller/AdminController"
 import { login, Register, VerifyUser } from "../controller/UserController"
 
 const router  = express.Router()
@@ -7,6 +7,7 @@ const router  = express.Router()
 router.post('/signup', Register)
 router.post('/verifyUser/:signature', VerifyUser)
 router.post('/login',login)
+router.get("/get-all-Properties", getAllProperties)
 
 
 

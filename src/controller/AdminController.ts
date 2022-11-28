@@ -7,6 +7,8 @@ import { emailBody, Mail, SendOtp } from '../utilities/Alerts';
 import { adminSchema, GenerateOTP, GeneratePassword, GenerateSalt, GenerateSignature, 
         loginSchema, option, registerSchema, verify } from '../utilities/utils';
 import bcrypt from 'bcrypt'
+import { propertyInstance } from '../model/propertyModel';
+import { VendorInstance } from '../model/Vendor';
 
 /**==============SUPER ADMIN REGISTRATION=============== */
 
@@ -161,7 +163,7 @@ export const SuperAdminRegister = async (req: JwtPayload, res: Response) => {
       });
     }
   };
-  // get all Users
+  //********************* */ get all Users  *************************************/
   export const getAllUsers = async (req: JwtPayload, res: Response) => {
     try {
       const { id } = req.user;
@@ -192,51 +194,52 @@ export const SuperAdminRegister = async (req: JwtPayload, res: Response) => {
     }
   };
   
-  // export const getAllVendors = async (req: JwtPayload, res: Response) => {
-  //   try {
-  //     const { id } = req.user;
+  export const getAllVendors = async (req: JwtPayload, res: Response) => {
+    try {
+      const { id } = req.user;
   
-  //     const admin = (await UserInstance.findOne({
-  //       where: { id: id },
-  //     })) as unknown as UserAttribute;
+      const admin = (await UserInstance.findOne({
+        where: { id: id },
+      })) as unknown as UserAttribute;
   
-  //     if (admin) {
-  //       const limit = req.query.limit as number | undefined;
-  //       const vendors = await VendorInstance.findAndCountAll({
-  //         limit: limit,
-  //       });
-  //       return res.status(200).json({
-  //         message: "you have succesfully retireved all vendors",
-  //         count: vendors.count,
-  //         Vendors: vendors.rows,
-  //       });
-  //     }
-  //     return res.status(200).json({
-  //       message: "unauthorised",
-  //     });
-  //   } catch (err) {
-  //     return res.status(500).json({
-  //       Error: "internal server error",
-  //       Route: "/admin/get-all-vendors",
-  //     });
-  //   }
-  // };
+      if (admin) {
+        const limit = req.query.limit as number | undefined;
+        const vendors = await VendorInstance.findAndCountAll({
+          limit: limit,
+        });
+        return res.status(200).json({
+          message: "you have succesfully retireved all vendors",
+          count: vendors.count,
+          Vendors: vendors.rows,
+        });
+      }
+      return res.status(200).json({
+        message: "unauthorised",
+      });
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({
+        Error: "internal server error",
+        Route: "/admin/get-all-vendors",
+      });
+    }
+  };
   
-  // export const getAllProperties = async (req: Request, res: Response) => {
-  //   try {
-  //     const limit = req.query.limit as number | undefined;
-  //     const property = await propertyInstance.findAndCountAll({
-  //       limit: limit,
-  //     });
-  //     return res.status(200).json({
-  //       message: "you have succesfully retireved all vendors",
-  //       count: property.count,
-  //       Vendors: property.rows,
-  //     });
-  //   } catch (err) {
-  //     return res.status(500).json({
-  //       Error: "internal server error",
-  //       Route: "/admin/get-all-vendors",
-  //     });
-  //   }
-  // };
+  export const getAllProperties = async (req: Request, res: Response) => {
+    try {
+      const limit = req.query.limit as number | undefined;
+      const property = await propertyInstance.findAndCountAll({
+        limit: limit,
+      });
+      return res.status(200).json({
+        message: "you have succesfully retireved all vendors",
+        count: property.count,
+        Vendors: property.rows,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        Error: "internal server error",
+        Route: "/admin/get-all-vendors",
+      });
+    }
+  };
