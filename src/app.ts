@@ -2,8 +2,8 @@ import express,{Request,Response,NextFunction}from "express"
 import logger from "morgan"
 import Error  from "http-errors"
 import cookieParser from "cookie-parser"
-import AdminRouter from "./route/AdminRoute"
-import UserRouter from './route/UserRoute'
+import AdminRouter from "./router/AdminRoute"
+import UserRouter from './router/UserRoute'
 import {db} from "./config/config"
 
 
