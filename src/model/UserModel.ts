@@ -21,7 +21,7 @@ export class UserInstance extends Model<UserAttribute>{}
 
 UserInstance.init({
     id:{
-        type:DataTypes.UUIDV4,
+        type:DataTypes.UUID,
         primaryKey: true,
         allowNull:false,
     },
@@ -71,15 +71,15 @@ UserInstance.init({
             allowNull:false,
             validate:{
                 notNull:{
-                    msg:"Phone Number is Needed"
+                    msg:"Phone number is Needed"
                 },
                 notEmpty:{
-                    msg:"Please provide a Phone Number "
+                    msg:"Please provide a Phone number "
                 }
             }
         },
         otp:{
-            type:DataTypes.NUMBER,
+            type:DataTypes.INTEGER,
             allowNull:false,
             validate:{
                 notNull:{

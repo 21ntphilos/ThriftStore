@@ -19,7 +19,7 @@ export class propertyInstance extends Model<propertyAttributes> {}
 
 propertyInstance.init({
     id: {
-        type: DataTypes.UUIDV4,
+        type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
       },
@@ -41,20 +41,20 @@ propertyInstance.init({
       },
       
       readyTime:{
-          type:DataTypes.NUMBER,
+          type:DataTypes.INTEGER,
           allowNull:true
       },
       price:{
-          type:DataTypes.NUMBER,
+          type:DataTypes.INTEGER,
           allowNull:true
       },
       rating:{
-          type:DataTypes.NUMBER,
+          type:DataTypes.INTEGER,
           allowNull:true
       },
 
       vendorId:{
-      type:DataTypes.UUIDV4,
+      type:DataTypes.UUID,
       allowNull:true
   },
   isSuspended:{

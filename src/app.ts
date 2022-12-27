@@ -4,17 +4,13 @@ import Error  from "http-errors"
 import cookieParser from "cookie-parser"
 import AdminRouter from "./router/AdminRoute"
 import UserRouter from './router/UserRoute'
-import {db} from "./config/config"
+import {connectDB} from "./config/config"
 
 
 const app = express()
 
 //{force:true}
-db.sync().then(()=>{
-    console.log("DATABASE CONNECTED SUCCESSFULLY")
-}).catch(err=>{
-    console.log(err)
-})
+connectDB()
 
 app.use(express.json());
 app.use(logger('dev'));

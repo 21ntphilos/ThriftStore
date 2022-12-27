@@ -7,7 +7,7 @@ export interface VendorModel {
     email: string,
     Password: string,
     isSuspended: boolean,
-    flags: number,
+    flags:number,
     vendorphone: string,
     salt: string
 }
@@ -16,7 +16,7 @@ export class VendorInstance extends Model<VendorModel>{}
 
 VendorInstance.init({
     id: {
-        type: DataTypes.UUIDV4,
+        type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false
     },
@@ -38,11 +38,11 @@ VendorInstance.init({
         allowNull: false,
     }, 
     flags: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false,
     }, 
     vendorphone: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false,
     }, 
     salt: {
