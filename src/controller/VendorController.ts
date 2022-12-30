@@ -1,103 +1,107 @@
-// import {Request,Response}from 'express'
-// import { VendorInstance, VendorModel } from '../model/Vendor';
-// import { GeneratePassword, GenerateSalt, GenerateSignature } from '../utilities/utils';
+import {Request,Response}from 'express'
+import { VendorInstance, VendorModel } from '../model/Vendor';
+import { GeneratePassword, GenerateSalt, GenerateSignature, loginSchema, option, validatePassword, VendorRegisterSchema } from '../utilities/utils';
+import {v4 as uuidv4} from 'uuid'
+
+export const VendorRegister = async (req: Request, res: Response) => {
+    try {
+        const { email, Password, confirm_password, Name, vendorphone } = req.body;
+        const id = uuidv4()
+        const validateUser = VendorRegisterSchema.validate(req.body, option);
+        if (validateUser.error) {
+            return res.status(400).json({
+                Error: validateUser.error.details[0].message
+            })
+        }
+        const salt = await GenerateSalt();
+        const userPassword = await GeneratePassword(Password, salt);
+
+        //         //check if user exists
+        const User = await VendorInstance.findOne({ where: { email: email } })
+        if (!User) {
+            let user = await VendorInstance.create({
+                id: id,
+                email,
+                Password: userPassword,
+                Name,
+                isSuspended: false,
+                flags: 0,
+                vendorphone,
+                salt: salt,
+                isAvailable: true
+            })
+
+            //             //check if user exists in db, if yes give him jwt signature
+            const Vendor = await VendorInstance.findOne({ where: { email: email } }) as unknown as VendorModel;
+            let signature = await GenerateSignature({
+                id: Vendor.id,
+                email: Vendor.email,
+                isSuspended: Vendor.isSuspended,
+
+            })
+            return res.status(201).json({
+                message: "Vendor created sucessfully",
+                signature,
+                User
+            })
+        }
+        return res.status(400).json({
+            message: "Vendor already exists"
+        })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            Error: "Internal server error",
+            route: "/campusex/register"
+        });
+    }
+}
 
 
-// export const VendorRegister = async (req: Request, res: Response)=>{
-//     try {
-//         const {email, Password, confirm_password, Name, vendorphone} = req.body;
-//         const id = uuidv4()
-//         const validateUser = VendorSchema.validate(req.body, option);
-//         if(validateUser.error){
-//             return res.status(400).json({
-//                 Error: validateUser.error.details[0].message
-//             })
-//         }
-//         const salt = await GenerateSalt();
-//         const userPassword = await GeneratePassword(Password, salt);
-    
-//         //check if user exists
-//         const User = await VendorInstance.findOne({where:{email:email}})
-//         if(!User){
-//             let user = await VendorInstance.create({
-//                 id: id,
-//                 email,
-//                 Password: userPassword,
-//                 Name,
-//                 isSuspended: false,
-//                 flags: 0,
-//                 vendorphone,
-//                 salt: salt
-//             })
-            
-//             //check if user exists in db, if yes give him jwt signature
-//             const Vendor = await VendorInstance.findOne({where:{email:email}}) as unknown as VendorModel;
-//             let signature = await GenerateSignature({
-//                 id: Vendor.id,
-//                 email: Vendor.email,
-//                 isSuspended: Vendor.isSuspended,
-                
-//             })
-//             return res.status(201).json({
-//                 message: "Vendor created sucessfully",
-//                 signature,
-//                 User
-//             })
-//         }
-//         return res.status(400).json({
-//             message: "Vendor already exists"
-//         })
-        
-//     } catch (error) {
-//         res.status(500).json({
-//             Error: "Internal server error",
-//             route: "/campusex/register"
-//         });
-//     }
-//     }
 
 
 
+export const vendorLogin = async (req: Request, res: Response) => {
+    try {
+        const { email, password } = req.body;
+        const validateUser = loginSchema.validate(req.body, option);
 
+        if (validateUser.error) {
+            return res.status(400).json({
+                Error: validateUser.error.details[0].message
+            })
+        }
+        const User = await VendorInstance.findOne({ where: { email: email } }) as unknown as VendorModel
+        if (User) {
+            const validation = await validatePassword(password, User.Password)
+            if (validation) {
+                let signature = await GenerateSignature({
+                    id: User.id,
+                    isSuspended: User.isSuspended,
+                    isAvailable: User.isAvailable,
 
-
-//     export const login=async(req: Request, res:Response)=>{
-//         try {
-//         const {email, Password} = req.body;
-//         const validateUser = loginSchema.validate(req.body, option);
-//         if(validateUser.error){
-//             return res.status(400).json({
-//                 Error: validateUser.error.details[0].message
-//             })
-//         }
-//         const User = await UserInstance.findOne({where:{email:email}}) as unknown as UserModel
-//         if(User){
-//             const validation = await validatePassword(Password, User.Password, User.salt)
-//             if(validation){
-//                 let signature = await generateSignature({
-//                     id: User.id,
-//                     isSuspended: User.isSuspended,
-//                     vendorphone: User.vendorphone
-//                 });
-//                 return res.status(200).json({
-//                     message: "You have sucessfully logged in",
-//                     signature,
-//                     email: User.email,
-//                     isSuspended: User.isSuspended,
-//                     vendorphone: User.vendorphone
-//                 })
-//             }
-//         }
-//         return res.status(400).json({
-//             Error: "Wrong username or password"
-//         })
-//         } catch (error) {
-//             res.status(500).json({
-//                 Error: "Internal server error",
-//                 route: "/user/login"
-//             })
-//         }
-//     }
+                });
+                return res.status(200).json({
+                    message: "You have sucessfully logged in as a Vendor",
+                    signature,
+                    email: User.email,
+                    isSuspended: User.isSuspended,
+                    isAvailable: User.isAvailable
+                })
+            }
+        }
+        return res.status(400).json({
+            Error: "Wrong Email or password"
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            Error: "Internal server error",
+            route: "/vendor/login"
+        })
+    }
+}
 
 // export const uploadProduct=async(req: Request, res: Response)=>{
 //     try {

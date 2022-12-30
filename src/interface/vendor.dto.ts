@@ -1,5 +1,5 @@
 export interface VendorPayload{
     id:string,
-    email:string,
-    serviceAvailability:boolean
+    isSuspended:boolean,
+    isAvailable:boolean 
 }

@@ -6,7 +6,7 @@ import { APP_SECRET } from '../config/config';
 // import {APP_SECRET} from "../config"
 // import { AuthPayload } from '../interface'
 
-export const registerSchema = Joi.object().keys({
+export const UserRegisterSchema = Joi.object().keys({
     email: Joi.string().email().required(),
     phone: Joi.string().required(),
     password: Joi.string().pattern(new RegExp("[a-zA-Z0-9]{3,30}$")),
@@ -23,8 +23,16 @@ export const registerSchema = Joi.object().keys({
 
 export const loginSchema = Joi.object().keys({
   email: Joi.string().required(),
-  password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
+  password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).required()
 });
+
+export const VendorRegisterSchema = Joi.object().keys({
+  Name: Joi.string(),
+  email: Joi.string().required(),
+  Password: Joi.string().required().regex(/[A-Za-z0-9]{3,30}/),
+  confirm_password: Joi.any().equal(Joi.ref('Password')).required().label('confirm password').messages({ 'any.only': '{{#label}} does not match' }),
+  vendorphone: Joi.string().required()
+})
 
 export const adminSchema = Joi.object().keys({
   email: Joi.string().required(),
@@ -52,6 +60,10 @@ export const GeneratePassword = async (password: string, salt: string) => {
   return await bcrypt.hash(password, salt);
 };
 
+export const validatePassword = async (inputPD: string, userPd: string)=>{
+  return bcrypt.compare(inputPD,userPd)
+}
+
 export const GenerateOTP = async () => {
   const otp = Math.floor(Math.random() * 9000)
   const expiry = new Date()
@@ -59,10 +71,10 @@ export const GenerateOTP = async () => {
   return {otp, expiry};
 };
 
-export const GenerateSignature=async(payload:AuthPayload)=>{
+export const GenerateSignature = async(payload:AuthPayload)=>{
     return jwt.sign(payload,APP_SECRET,{expiresIn:'1d'});
 }
 
 export async function verify (signature:string){
-  return await jwt.verify(signature,APP_SECRET)
+  return jwt.verify(signature,APP_SECRET)
 }

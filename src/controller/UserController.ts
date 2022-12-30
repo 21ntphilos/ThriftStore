@@ -5,7 +5,7 @@ import { fromAdminMail, UserSubject } from '../config/config';
 import { UserAttribute, UserInstance } from '../model/UserModel';
 import { emailBody, Mail, SendOtp } from '../utilities/Alerts';
 import { GenerateOTP, GeneratePassword, GenerateSalt, GenerateSignature, 
-        loginSchema, option, registerSchema, verify } from '../utilities/utils';
+        loginSchema, option, UserRegisterSchema, validatePassword, verify } from '../utilities/utils';
 import bcrypt from 'bcrypt'
 
 /** ======================================== User Register =========================================== **/
@@ -14,7 +14,7 @@ export const Register = async (req:Request,res:Response, next:NextFunction ) => 
         const{email,phone,password,confirm_password,firstName,lastName} = req.body
         const uuiduser = uuidv4()
         
-        const validateResult = registerSchema.validate(req.body,option)
+        const validateResult = UserRegisterSchema.validate(req.body,option)
         if (validateResult.error){
             return res.status(400).json({
                 Error:validateResult.error.details[0].message
@@ -99,7 +99,6 @@ export const VerifyUser = async(req:JwtPayload, res:Response)=>{
                 }) as unknown as UserAttribute
                
                 const newSignature = await GenerateSignature({
-                    // the frontend guy stores the token and in the cookie or local storage
                     id: updatedUser.id,
                     email: updatedUser.email,
                     isSuspended:updatedUser.isSuspended
@@ -113,7 +112,7 @@ export const VerifyUser = async(req:JwtPayload, res:Response)=>{
                     meessage: "Your Account has been Successfully verified",
                     Signature: newSignature,
                     verified: user.verified
-                    // for you to send a response you have to findone again and use the response else you cannot 
+                    
                 })
             }
             return res.status(400).json({
@@ -127,8 +126,8 @@ export const VerifyUser = async(req:JwtPayload, res:Response)=>{
     }
 } catch (error) {
     res.status(500).json({
-        Error: "Internal Server Error", // error to display when the error occures
-        route: "/user/verify" // optional 
+        Error: "Internal Server Error", 
+        route: "/user/verify"  
     })
 }
 }
@@ -151,7 +150,7 @@ export const login = async(req:Request, res:Response)=>{
 
         if(User.isSuspended === false){
 
-            const validation = await bcrypt.compare(password, User.password)
+            const validation = await validatePassword(password, User.password)
 
             if(validation){
                 const signature = await GenerateSignature({

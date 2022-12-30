@@ -9,7 +9,8 @@ export interface VendorModel {
     isSuspended: boolean,
     flags:number,
     vendorphone: string,
-    salt: string
+    salt: string,
+    isAvailable: boolean
 }
 
 export class VendorInstance extends Model<VendorModel>{}
@@ -42,13 +43,18 @@ VendorInstance.init({
         allowNull: false,
     }, 
     vendorphone: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
     }, 
     salt: {
         type: DataTypes.STRING,
         allowNull: false,
     }, 
+    isAvailable: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+    }
+    
 },
 {
     sequelize: db,

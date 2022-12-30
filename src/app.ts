@@ -4,6 +4,7 @@ import Error  from "http-errors"
 import cookieParser from "cookie-parser"
 import AdminRouter from "./router/AdminRoute"
 import UserRouter from './router/UserRoute'
+import VendorsRouter from './router/VendorsRoute'
 import {connectDB} from "./config/config"
 
 
@@ -17,7 +18,8 @@ app.use(logger('dev'));
 app.use(cookieParser());
 
 app.use('/users',UserRouter )
-app.use('/admins',AdminRouter )
+app.use('/admins', AdminRouter)
+app.use('/vendors', VendorsRouter)
 
 
 const port = 7070
